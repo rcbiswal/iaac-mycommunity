@@ -30,3 +30,4 @@ resource "aws_route53_record" "route53_alb" {
   ttl     = "300"
   records = ["${aws_alb.alb.dns_name}"]
 }
+#
