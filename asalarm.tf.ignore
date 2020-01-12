@@ -40,3 +40,4 @@ resource "aws_cloudwatch_metric_alarm" "bat" {
   alarm_description = "This metric monitors ec2 cpu utilization"
   #alarm_actions     = "${aws_sns_topic.alarm.arn}"
 }
+#
