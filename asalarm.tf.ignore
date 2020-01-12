@@ -1,0 +1,42 @@
+## Terraform project. This project uses remote state to store the details of resources terraform has
+## created. All state should be stored in a remote backend (s3) to allow collaboration across users
+## More details on Terraform state can be found here: https://www.terraform.io/docs/state/index.html
+## More details on Terraform remote state here: https://www.terraform.io/docs/state/remote.html
+
+## IMPORTANT: The remote state configuration in this template requires Terraform v0.11.1.
+
+terraform {
+  required_version = "= 0.11.1"
+}
+
+#data "aws_autoscaling_group" "asg" {
+# name = "rcb-as-group"
+#}
+
+resource "aws_autoscaling_policy" "scale" {
+  depends_on = ["aws_autoscaling_group.rcb-asg"]
+  name                   = "rcb-scale"
+  scaling_adjustment     = 4
+  adjustment_type        = "ChangeInCapacity"
+  cooldown               = 300
+  autoscaling_group_name = "${aws_autoscaling_group.rcb-asg.name}"
+}
+
+resource "aws_cloudwatch_metric_alarm" "bat" {
+  depends_on = ["aws_autoscaling_group.rcb-asg"]
+  alarm_name          = "rcb-scale-alarm"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "80"
+
+  dimensions = {
+    AutoScalingGroupName = "${aws_autoscaling_group.rcb-asg.arn}"
+  }
+
+  alarm_description = "This metric monitors ec2 cpu utilization"
+  #alarm_actions     = "${aws_sns_topic.alarm.arn}"
+}

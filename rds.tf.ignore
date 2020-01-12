@@ -1,0 +1,34 @@
+## Terraform project. This project uses remote state to store the details of resources terraform has
+## created. All state should be stored in a remote backend (s3) to allow collaboration across users
+## More details on Terraform state can be found here: https://www.terraform.io/docs/state/index.html
+## More details on Terraform remote state here: https://www.terraform.io/docs/state/remote.html
+
+## IMPORTANT: The remote state configuration in this template requires Terraform v0.11.1.
+
+terraform {
+  required_version = "= 0.11.1"
+}
+
+resource "aws_db_instance" "fff-db" {
+  allocated_storage        = 20 # gigabytes
+#  #backup_retention_period  = 7   # in days
+  db_subnet_group_name     = "wptestrdssubnet"
+  engine                   = "mysql"
+  engine_version           = "5.7.26"
+  identifier               = "fff-db"  # console DB instance id ...DB Instance Identifier
+  instance_class           = "db.t2.micro"  
+ # templates		           = "dev/test"
+  multi_az                 =  true
+  #availability_zones        = ["us-east-1a","us-east-1b","us-east-1c"]
+ # name                     = "fff-db" # console DB name
+  parameter_group_name     = "default.mysql5.7" # if you have tuned it
+  password                 = "admin123$"
+  port                     = 3306
+  publicly_accessible      = true
+#  storage_encrypted        = true # you should always do this
+  storage_type             = "gp2"
+  username                 = "admin"
+ # vpc_security_group_id   = ["${var.sgid}"]
+ skip_final_snapshot       = true
+ enabled_cloudwatch_logs_exports = ["error","slowquery"]
+}

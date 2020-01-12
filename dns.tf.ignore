@@ -1,0 +1,32 @@
+## Terraform project. This project uses remote state to store the details of resources terraform has
+## created. All state should be stored in a remote backend (s3) to allow collaboration across users
+## More details on Terraform state can be found here: https://www.terraform.io/docs/state/index.html
+## More details on Terraform remote state here: https://www.terraform.io/docs/state/remote.html
+
+## IMPORTANT: The remote state configuration in this template requires Terraform v0.11.1.
+
+terraform {
+  required_version = "= 0.11.1"
+}
+
+# Data source of Load Balancer
+#data "aws_alb" "albd" {
+#	name = "rcb-alb"
+#}
+
+# Data source of Hosted Zone
+data "aws_route53_zone" "host" {
+  name         = "rcb.com."
+}
+
+# Create a CNAME for the ALB
+resource "aws_route53_record" "route53_alb" {
+
+  depends_on = ["aws_alb.alb"]
+  allow_overwrite = true
+  zone_id = "${data.aws_route53_zone.host.id}"
+  name    = "my.${data.aws_route53_zone.host.name}"
+  type    = "CNAME"
+  ttl     = "300"
+  records = ["${aws_alb.alb.dns_name}"]
+}
