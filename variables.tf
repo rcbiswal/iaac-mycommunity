@@ -29,9 +29,7 @@ variable "elb-webaccess-port80" {
 }
 
 variable "zone" {
-    
    default = "rcb.com."
-
 }
 
 variable "alarms_email" {
